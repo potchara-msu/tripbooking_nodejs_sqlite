@@ -85,7 +85,23 @@ app.delete("/destinations/:id", (req, res) => {
 // ------------------------------------------------------------
 // Get all trips
 app.get("/trips", (req, res) => {
-  db.all("SELECT * FROM trip", [], (err, rows) => {
+  const sql = `
+    SELECT 
+      t.idx, 
+      t.name, 
+      t.country, 
+      t.coverimage, 
+      t.detail, 
+      t.price, 
+      t.duration,
+      d.zone AS destination_zone 
+    FROM 
+      trip AS t
+    JOIN 
+      destination AS d ON t.destinationid = d.idx
+  `;
+
+  db.all(sql, [], (err, rows) => {
     handleResponse(res, err, rows);
   });
 });
@@ -93,7 +109,25 @@ app.get("/trips", (req, res) => {
 // Get a specific trip
 app.get("/trips/:id", (req, res) => {
   const id = req.params.id;
-  db.get("SELECT * FROM trip WHERE idx = ?", [id], (err, row) => {
+  const sql = `
+    SELECT 
+      t.idx, 
+      t.name, 
+      t.country, 
+      t.coverimage, 
+      t.detail, 
+      t.price, 
+      t.duration,
+      d.zone AS destination_zone 
+    FROM 
+      trip AS t
+    JOIN 
+      destination AS d ON t.destinationid = d.idx
+    WHERE 
+      t.idx = ?
+  `;
+
+  db.get(sql, [id], (err, row) => {
     handleResponse(res, err, row, 404, "Trip not found");
   });
 });
