@@ -224,6 +224,32 @@ app.delete("/customers/:id", (req, res) => {
   });
 });
 
+app.post("/customers/login", (req, res) => {
+  const { phone, password } = req.body;
+
+  // Basic validation (you should add more robust validation in a real app)
+  if (!phone || !password) {
+    res.status(400).json({ error: "Phone and password are required" });
+    return;
+  }
+
+  const sql = "SELECT * FROM customer WHERE phone = ? AND password = ?";
+  db.get(sql, [phone, password], (err, row) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+
+    if (!row) {
+      res.status(401).json({ error: "Invalid phone or password" });
+      return;
+    }
+
+    // Successful login
+    res.json({ message: "Login successful", customer: row });
+  });
+});
+
 // ------------------------------------------------------------
 // MEETINGS CRUD
 // ------------------------------------------------------------
