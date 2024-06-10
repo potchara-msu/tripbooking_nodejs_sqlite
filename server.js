@@ -193,7 +193,19 @@ app.delete("/trips/:id", (req, res) => {
 // Get all customers
 app.get("/customers", (req, res) => {
   db.all("SELECT * FROM customer", [], (err, rows) => {
-    handleResponse(res, err, rows);
+    if (err) {
+      handleResponse(res, err);
+      return;
+    }
+
+    // Remove password from each customer object
+    const sanitizedRows = rows.map(row => {
+      const sanitizedRow = { ...row };
+      delete sanitizedRow.password;
+      return sanitizedRow;
+    });
+
+    handleResponse(res, null, sanitizedRows); 
   });
 });
 
@@ -201,7 +213,21 @@ app.get("/customers", (req, res) => {
 app.get("/customers/:id", (req, res) => {
   const id = req.params.id;
   db.get("SELECT * FROM customer WHERE idx = ?", [id], (err, row) => {
-    handleResponse(res, err, row, 404, "Customer not found");
+    if (err) {
+      handleResponse(res, err, null, 404, "Customer not found");
+      return;
+    }
+
+    if (!row) {
+      handleResponse(res, null, null, 404, "Customer not found");
+      return;
+    }
+
+    // Remove password from the response data
+    const sanitizedRow = { ...row };
+    delete sanitizedRow.password;
+
+    handleResponse(res, null, sanitizedRow);
   });
 });
 
@@ -279,8 +305,11 @@ app.post("/customers/login", (req, res) => {
       return;
     }
 
-    // Successful login
-    res.json({ message: "Login successful", customer: row });
+    // Successful login - remove password from response
+    const customerData = { ...row }; // Create a copy
+    delete customerData.password; // Remove the password field
+
+    res.json({ message: "Login successful", customer: customerData });
   });
 });
 
