@@ -252,10 +252,10 @@ app.post("/customers", (req, res) => {
 // Update a customer
 app.put("/customers/:id", (req, res) => {
   const id = req.params.id;
-  const { fullname, phone, email, image, password } = req.body;
+  const { fullname, phone, email, image } = req.body;
   db.run(
-    "UPDATE customer SET fullname = ?, phone = ?, email = ?, image = ?, password = ? WHERE idx = ?",
-    [fullname, phone, email, image, password, id],
+    "UPDATE customer SET fullname = ?, phone = ?, email = ?, image = ? WHERE idx = ?",
+    [fullname, phone, email, image, id],
     function (err) {
       handleResponse(
         res,
@@ -478,6 +478,15 @@ function handleResponse(
   res.json(data);
 }
 
+var os = require("os");
+var ip = "0.0.0.0";
+var ips = os.networkInterfaces();
+Object.keys(ips).forEach(function (_interface) {
+  ips[_interface].forEach(function (_dev) {
+    if (_dev.family === "IPv4" && !_dev.internal) ip = _dev.address;
+  });
+});
+
 app.listen(port, () => {
-  console.log(`Trip booking API listening at http://localhost:${port}`);
+  console.log(`Trip booking API listening at http://${ip}:${port}`);
 });
