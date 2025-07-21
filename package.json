@@ -9,9 +9,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "description": "",
   "dependencies": {
-    "express": "^4.19.2",
+    "express": "^5.1.0",
     "sqlite3": "^5.1.7"
-  },
-  "description": ""
+  }
 }
