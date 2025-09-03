@@ -1,5 +1,6 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
+const cors = require("cors");
 const app = express();
 const port = 3000;
 
@@ -10,6 +11,13 @@ const db = new sqlite3.Database("./tripbooking.db", (err) => {
     console.log("Connected to the tripbooking database.");
   }
 });
+
+// Enable CORS for all origins
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 app.use(express.json());
 
