@@ -1,101 +1,15 @@
 const express = require("express");
 const sqlite3 = require("sqlite3").verbose();
 const app = express();
-const port = process.env.PORT || 3000;
+const port = 3000;
 
-// Use in-memory database for Vercel deployment, file database for local development
-const isVercel = process.env.VERCEL === '1';
-const dbPath = isVercel ? ':memory:' : './tripbooking.db';
-
-const db = new sqlite3.Database(dbPath, (err) => {
+const db = new sqlite3.Database("./tripbooking.db", (err) => {
   if (err) {
     console.error(err.message);
   } else {
-    console.log(`Connected to the tripbooking database (${isVercel ? 'in-memory' : 'file'}).`);
-    
-    // If using in-memory database, create tables
-    if (isVercel) {
-      initializeDatabase();
-    }
+    console.log("Connected to the tripbooking database.");
   }
 });
-
-// Initialize database tables for in-memory database
-function initializeDatabase() {
-  // Create destination table
-  db.run(`CREATE TABLE IF NOT EXISTS destination (
-    idx INTEGER PRIMARY KEY AUTOINCREMENT,
-    zone TEXT NOT NULL
-  )`);
-
-  // Create trip table
-  db.run(`CREATE TABLE IF NOT EXISTS trip (
-    idx INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    country TEXT NOT NULL,
-    destinationid INTEGER,
-    coverimage TEXT,
-    detail TEXT,
-    price REAL,
-    duration INTEGER,
-    FOREIGN KEY (destinationid) REFERENCES destination (idx)
-  )`);
-
-  // Create customer table
-  db.run(`CREATE TABLE IF NOT EXISTS customer (
-    idx INTEGER PRIMARY KEY AUTOINCREMENT,
-    fullname TEXT NOT NULL,
-    phone TEXT UNIQUE NOT NULL,
-    email TEXT,
-    image TEXT,
-    password TEXT NOT NULL
-  )`);
-
-  // Create meeting table
-  db.run(`CREATE TABLE IF NOT EXISTS meeting (
-    idx INTEGER PRIMARY KEY AUTOINCREMENT,
-    detail TEXT,
-    meetingdatetime TEXT,
-    latitude REAL,
-    longitude REAL
-  )`);
-
-  // Create booking table
-  db.run(`CREATE TABLE IF NOT EXISTS booking (
-    idx INTEGER PRIMARY KEY AUTOINCREMENT,
-    customerid INTEGER,
-    bookdatetime TEXT,
-    tripid INTEGER,
-    meetingid INTEGER,
-    FOREIGN KEY (customerid) REFERENCES customer (idx),
-    FOREIGN KEY (tripid) REFERENCES trip (idx),
-    FOREIGN KEY (meetingid) REFERENCES meeting (idx)
-  )`);
-
-  // Insert sample data for in-memory database
-  insertSampleData();
-}
-
-// Insert sample data for in-memory database
-function insertSampleData() {
-  // Sample destinations
-  db.run("INSERT INTO destination (zone) VALUES ('Asia'), ('Europe'), ('America')");
-  
-  // Sample trips
-  db.run(`INSERT INTO trip (name, country, destinationid, coverimage, detail, price, duration) 
-          VALUES ('Tokyo Adventure', 'Japan', 1, 'tokyo.jpg', 'Explore the vibrant city of Tokyo', 1500.00, 7)`);
-  
-  db.run(`INSERT INTO trip (name, country, destinationid, coverimage, detail, price, duration) 
-          VALUES ('Paris Romance', 'France', 2, 'paris.jpg', 'Romantic getaway in the City of Light', 2000.00, 5)`);
-  
-  // Sample customer
-  db.run(`INSERT INTO customer (fullname, phone, email, image, password) 
-          VALUES ('John Doe', '+1234567890', 'john@example.com', 'john.jpg', 'password123')`);
-  
-  // Sample meeting
-  db.run(`INSERT INTO meeting (detail, meetingdatetime, latitude, longitude) 
-          VALUES ('Airport pickup', '2024-01-15 10:00:00', 35.6762, 139.6503)`);
-}
 
 app.use(express.json());
 
@@ -564,21 +478,15 @@ function handleResponse(
   res.json(data);
 }
 
-// Export the app for Vercel
-module.exports = app;
-
-// Only start the server if not running on Vercel
-if (!isVercel) {
-  var os = require("os");
-  var ip = "0.0.0.0";
-  var ips = os.networkInterfaces();
-  Object.keys(ips).forEach(function (_interface) {
-    ips[_interface].forEach(function (_dev) {
-      if (_dev.family === "IPv4" && !_dev.internal) ip = _dev.address;
-    });
+var os = require("os");
+var ip = "0.0.0.0";
+var ips = os.networkInterfaces();
+Object.keys(ips).forEach(function (_interface) {
+  ips[_interface].forEach(function (_dev) {
+    if (_dev.family === "IPv4" && !_dev.internal) ip = _dev.address;
   });
+});
 
-  app.listen(port, () => {
-    console.log(`Trip booking API listening at http://${ip}:${port}`);
-  });
-}
+app.listen(port, () => {
+  console.log(`Trip booking API listening at http://${ip}:${port}`);
+});
